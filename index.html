@@ -593,14 +593,18 @@
                 alert('Inserisci un commento per completare l\'attività.');
                 document.getElementById(`task-${taskId}`).checked = false; return;
             }
-            const task = { ...tasks.find(t => t.id == taskId) };
-            task.status = 'completed';
-            task.progress = 100;
-            task.completedat = new Date().toISOString();
-            task.comments = task.comments || [];
-            task.comments.push({ memberId: currentUser.id, comment, timestamp: new Date().toISOString() });
+            
+            const originalTask = tasks.find(t => t.id == taskId);
+            const updatedFields = {
+                id: taskId,
+                status: 'completed',
+                progress: 100,
+                completedat: new Date().toISOString(),
+                comments: [...(originalTask.comments || []), { memberId: currentUser.id, comment, timestamp: new Date().toISOString() }]
+            };
+
             try {
-                await callGoogleScript('POST', 'updateTask', task);
+                await callGoogleScript('POST', 'updateTask', updatedFields);
                 await refreshData();
                 showMessage('Attività completata!', 'success');
             } catch(error) { /* handled */ }
@@ -667,3 +671,4 @@
     </script>
 </body>
 </html>
+
